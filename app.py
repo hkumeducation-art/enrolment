@@ -8,7 +8,7 @@ st.title("📚 Online Course Enrolment")
 st.write("Please select a maximum of 4 courses.")
 
 # --- CONFIGURATION ---
-SHEETDB_URL = "https://sheetdb.io/app/apis"
+SHEETDB_URL = "https://sheetdb.io/api/v1/irwnfb4z2oayi"
 
 # The exact 30 student numbers allowed
 VALID_STUDENTS = [
