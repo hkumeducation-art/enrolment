@@ -4,8 +4,9 @@ from datetime import datetime
 
 st.set_page_config(page_title="Course Enrolment Portal")
 
-st.title("📚 Online Course Enrolment")
-st.write("Please select a maximum of **4 courses** in total. You may only select **1 course per day**.")
+# --- UPDATED HEADING AND TEXT ---
+st.title("Pre-enrolment for GS students before official enrolment period")
+st.markdown("Please select a maximum of 4 electives. Please do not choose 2 courses scheduled for the same day. **[Important: You are required to enrol in the remaining 3 electives during the official enrolment period]**")
 st.divider()
 
 # --- CONFIGURATION ---
