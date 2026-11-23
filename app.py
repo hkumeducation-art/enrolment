@@ -22,54 +22,64 @@ VALID_STUDENTS = [
     "30368798", "30369241", "30369812", "30369854", "30369999"
 ]
 
-# Course Dictionary Grouped by Day
+# Updated Course Dictionary Grouped by Semester and Day
 SCHEDULE = {
-    "Mondays": [
+    "Semester 1 Mondays": [
         "MABC0001 - Intro to course 001",
         "MABC0002 - Intro to course 002",
         "MABC0003 - Intro to course 003 (ARM)",
-        "MABC0004 - Intro to course 004",
+        "MABC0004 - Intro to course 004"
+    ],
+    "Semester 1 Tuesdays": [
         "MABC0005 - Intro to course 005",
         "MABC0006 - Intro to course 006",
         "MABC0007 - Intro to course 007",
         "MABC0008 - Intro to course 008"
     ],
-    "Tuesdays": [
+    "Semester 1 Wednesdays": [
         "MABC0009 - Intro to course 009",
         "MABC0010 - Intro to course 010 (ARM)",
         "MABC0011 - Intro to course 011",
-        "MABC0012 - Intro to course 012",
-        "MABC0013 - Intro to course 013",
-        "MABC0014 - Intro to course 014",
-        "MABC0015 - Intro to course 015",
-        "MABC0016 - Intro to course 016"
+        "MABC0012 - Intro to course 012"
     ],
-    "Wednesdays": [
+    "Semester 1 Thursdays": [
+        "MABC0013 - Intro to course 013",
+        "MABC0014 - Intro to course 014"
+    ],
+    "Semester 1 Fridays": [
+        "MABC0015 - Intro to course 015",
+        "MABC0016 - Intro to course 016",
         "MABC0017 - Intro to course 017",
-        "MABC0018 - Intro to course 018",
+        "MABC0018 - Intro to course 018"
+    ],
+    "Semester 2 Mondays": [
         "MABC0019 - Intro to course 019",
         "MABC0020 - Intro to course 020 (ARM)",
         "MABC0021 - Intro to course 021",
         "MABC0022 - Intro to course 022",
-        "MABC0023 - Intro to course 023",
-        "MABC0024 - Intro to course 024"
+        "MABC0023 - Intro to course 023"
     ],
-    "Thursdays": [
+    "Semester 2 Tuesdays": [
+        "MABC0024 - Intro to course 024",
         "MABC0025 - Intro to course 025",
         "MABC0026 - Intro to course 026",
-        "MABC0027 - Intro to course 027",
+        "MABC0027 - Intro to course 027"
+    ],
+    "Semester 2 Wednesdays": [
         "MABC0028 - Intro to course 028",
         "MABC0029 - Intro to course 029",
         "MABC0030 - Intro to course 030 (ARM)",
         "MABC0031 - Intro to course 031",
         "MABC0032 - Intro to course 032"
     ],
-    "Fridays": [
+    "Semester 2 Thursdays": [
         "MABC0033 - Intro to course 033",
         "MABC0034 - Intro to course 034",
         "MABC0035 - Intro to course 035",
         "MABC0036 - Intro to course 036",
-        "MABC0037 - Intro to course 037 (ARM)",
+        "MABC0037 - Intro to course 037 (ARM)"
+    ],
+    "Semester 2 Fridays": [
         "MABC0038 - Intro to course 038 (ARM)",
         "MABC0039 - Intro to course 039",
         "MABC0040 - Intro to course 040"
@@ -113,7 +123,7 @@ else:
     if st.button("Submit Enrolment"):
         total_selected = len(selected_courses_with_day)
         
-        # Check for day conflicts (more than 1 per day)
+        # Check for day conflicts (more than 1 per day/semester slot)
         day_counts = {}
         for day, course in selected_courses_with_day:
             day_counts[day] = day_counts.get(day, 0) + 1
@@ -130,7 +140,7 @@ else:
         elif conflict_days:
             # If they picked multiple on one day, stop them
             days_str = ", ".join(conflict_days)
-            st.error(f"⚠️ Schedule Conflict! You selected multiple courses on: **{days_str}**. Please choose only 1 course per day.")
+            st.error(f"⚠️ Schedule Conflict! You selected multiple courses on: **{days_str}**. Please choose only 1 course per time slot.")
             
         else:
             # If all rules are followed, save the data
