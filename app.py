@@ -6,7 +6,7 @@ st.set_page_config(page_title="Course Enrolment Portal")
 
 # --- UPDATED HEADING AND TEXT ---
 st.title("Pre-enrolment for GS students before official enrolment period")
-st.markdown("Please select a maximum of 4 electives. Please do not choose 2 courses scheduled for the same day. **[Important: You are required to enrol in the remaining 3 electives during the official enrolment period]**")
+st.markdown("Please select a maximum of 4 electives. Please do not choose more than 1 course scheduled for the same day. **[Important: You are required to enrol in the remaining 3 electives during the official enrolment period]**")
 st.divider()
 
 # --- CONFIGURATION ---
