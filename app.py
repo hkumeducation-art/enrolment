@@ -10,7 +10,7 @@ st.markdown("Please select a maximum of 4 electives. Please do not choose 2 cour
 st.divider()
 
 # --- CONFIGURATION ---
-SHEETDB_URL = "https://sheetdb.io/api/v1/irwnfb4z2oayi"
+SHEETDB_URL = "https://sheetdb.io/api/v1/86bwjqyllhqzy"
 
 # The exact 30 student numbers allowed
 VALID_STUDENTS = [
