@@ -156,7 +156,7 @@ else:
                 # Send data to SheetDB
                 response = requests.post(SHEETDB_URL, json=data)
                 
-                if response.status_code == 201:
+                                if response.status_code == 201:
                     st.success("✅ Enrolment successful! You can now close this window.")
                 else:
-                    st.error("Something went wrong. Please contact administration.")
+                    st.error(f"Error {response.status_code}: {response.text}")
