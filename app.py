@@ -6,7 +6,13 @@ st.set_page_config(page_title="Course Enrolment Portal")
 
 # --- UPDATED HEADING AND TEXT ---
 st.title("Pre-enrolment for GS students before official enrolment period")
-st.markdown("Please select a maximum of 4 electives. Please do not choose 2 courses scheduled for the same day. **[Important: You are required to enrol in the remaining 3 electives during the official enrolment period]**")
+st.markdown("""
+Please select a maximum of 4 electives. Please do not choose 2 courses scheduled for the same day.
+
+[No resubmission is allowed. Please check your selection carefully before clicking to submit]
+
+**[Important: You are required to enrol in the remaining 3 electives during the official enrolment period]**
+""")
 st.divider()
 
 # --- CONFIGURATION ---
@@ -90,6 +96,7 @@ SCHEDULE = {
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.student_id = ""
+    st.session_state.has_submitted = False
 
 # --- LOGIN SCREEN ---
 if not st.session_state.logged_in:
@@ -98,9 +105,22 @@ if not st.session_state.logged_in:
     
     if st.button("Access Portal"):
         if student_id in VALID_STUDENTS:
-            st.session_state.logged_in = True
-            st.session_state.student_id = student_id
-            st.rerun()
+            with st.spinner("Checking database..."):
+                try:
+                    # Look at Google Sheet to see who has submitted
+                    all_records = requests.get(SHEETDB_URL).json()
+                    
+                    # Extract all student numbers that are already in the sheet
+                    existing_students = [record.get("Student Number", "") for record in all_records if isinstance(record, dict)]
+                    
+                    if student_id in existing_students:
+                        st.error("❌ You have already submitted your enrolment. Multiple submissions are not allowed.")
+                    else:
+                        st.session_state.logged_in = True
+                        st.session_state.student_id = student_id
+                        st.rerun()
+                except Exception as e:
+                    st.error("Failed to connect to the database. Please try again.")
         else:
             st.error("Access Denied. Invalid Student Number.")
 
@@ -108,65 +128,64 @@ if not st.session_state.logged_in:
 else:
     st.success(f"Welcome, Student {st.session_state.student_id}!")
     
-    # Create checkboxes and store selections
-    selected_courses_with_day = []
-    
-    for day, courses in SCHEDULE.items():
-        st.subheader(f"📅 {day}")
-        for course in courses:
-            # Create a checkbox for each course
-            if st.checkbox(course, key=course):
-                selected_courses_with_day.append((day, course))
-                
-    st.divider()
-    
-    if st.button("Submit Enrolment"):
-        total_selected = len(selected_courses_with_day)
+    # If they just submitted, hide the form and show success message
+    if st.session_state.has_submitted:
+        st.info("✅ Your enrolment has been successfully recorded. You may now close this window.")
         
-        # Check for day conflicts (more than 1 per day/semester slot)
-        day_counts = {}
-        for day, course in selected_courses_with_day:
-            day_counts[day] = day_counts.get(day, 0) + 1
-            
-        conflict_days = [day for day, count in day_counts.items() if count > 1]
+    # Otherwise, show the checkboxes
+    else:
+        selected_courses_with_day = []
         
-        # Validation Logic
-        if total_selected == 0:
-            st.warning("Please select at least 1 course before submitting.")
+        for day, courses in SCHEDULE.items():
+            st.subheader(f"📅 {day}")
+            for course in courses:
+                if st.checkbox(course, key=course):
+                    selected_courses_with_day.append((day, course))
+                    
+        st.divider()
+        
+        if st.button("Submit Enrolment"):
+            total_selected = len(selected_courses_with_day)
             
-        elif total_selected > 4:
-            st.error(f"⚠️ You selected {total_selected} courses. You can only choose a maximum of 4.")
+            day_counts = {}
+            for day, course in selected_courses_with_day:
+                day_counts[day] = day_counts.get(day, 0) + 1
+                
+            conflict_days = [day for day, count in day_counts.items() if count > 1]
             
-        elif conflict_days:
-            # If they picked multiple on one day, stop them
-            days_str = ", ".join(conflict_days)
-            st.error(f"⚠️ Schedule Conflict! You selected multiple courses on: **{days_str}**. Please choose only 1 course per time slot.")
-            
-        else:
-            # If all rules are followed, save the data
-            with st.spinner("Saving your enrolment..."):
-                final_courses = [item[1] for item in selected_courses_with_day]
+            if total_selected == 0:
+                st.warning("Please select at least 1 course before submitting.")
                 
-                # Pad the list so it always has 4 items for the spreadsheet columns
-                while len(final_courses) < 4:
-                    final_courses.append("")
+            elif total_selected > 4:
+                st.error(f"⚠️ You selected {total_selected} courses. You can only choose a maximum of 4.")
                 
-                # Prepare data
-                data = {
-                    "data": [{
-                        "Student Number": st.session_state.student_id,
-                        "Course 1": final_courses[0],
-                        "Course 2": final_courses[1],
-                        "Course 3": final_courses[2],
-                        "Course 4": final_courses[3],
-                        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    }]
-                }
+            elif conflict_days:
+                days_str = ", ".join(conflict_days)
+                st.error(f"⚠️ Schedule Conflict! You selected multiple courses on: **{days_str}**. Please choose only 1 course per time slot.")
                 
-                # Send data to SheetDB
-                response = requests.post(SHEETDB_URL, json=data)
-                
-                if response.status_code == 201:
-                    st.success("✅ Enrolment successful! You can now close this window.")
-                else:
-                    st.error(f"Error {response.status_code}: {response.text}")
+            else:
+                with st.spinner("Saving your enrolment..."):
+                    final_courses = [item[1] for item in selected_courses_with_day]
+                    
+                    while len(final_courses) < 4:
+                        final_courses.append("")
+                    
+                    data = {
+                        "data": [{
+                            "Student Number": st.session_state.student_id,
+                            "Course 1": final_courses[0],
+                            "Course 2": final_courses[1],
+                            "Course 3": final_courses[2],
+                            "Course 4": final_courses[3],
+                            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        }]
+                    }
+                    
+                    response = requests.post(SHEETDB_URL, json=data)
+                    
+                    if response.status_code == 201:
+                        # Success! Mark as submitted and refresh the page to hide the form
+                        st.session_state.has_submitted = True
+                        st.rerun()
+                    else:
+                        st.error(f"Error {response.status_code}: {response.text}")
