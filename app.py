@@ -9,10 +9,9 @@ st.set_page_config(page_title="Course Enrolment Portal")
 # --- UPDATED HEADING AND TEXT ---
 st.title("Pre-enrolment for GS students before official enrolment period")
 st.markdown("""
-Please note the following:
-1. Please select a maximum of 4 electives. Do not choose 2 courses scheduled for the same day.
-2. No resubmission is allowed. Please check your selection carefully before clicking to submit.
-3. **You are required to enrol in the remaining 3 electives during the official enrolment period.**
+1. Please select a maximum of **4 electives**. Do not choose 2 courses scheduled for the same day.
+2. **No resubmission is allowed**. Please check your selections carefully before clicking to submit.
+3. You are required to enrol in the remaining 3 electives during the official enrolment period, either this year, or next year (i.e. Year 2 for part-time students).
 """)
 st.divider()
 
