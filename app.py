@@ -101,7 +101,7 @@ if "logged_in" not in st.session_state:
 # --- LOGIN SCREEN ---
 if not st.session_state.logged_in:
     st.subheader("Student Login")
-    student_id = st.text_input("Enter your Student Number:")
+    student_id = st.text_input("Enter your Student Number:").strip()
     
     if st.button("Access Portal"):
         if student_id in VALID_STUDENTS:
