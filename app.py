@@ -7,11 +7,10 @@ st.set_page_config(page_title="Course Enrolment Portal")
 # --- UPDATED HEADING AND TEXT ---
 st.title("Pre-enrolment for GS students before official enrolment period")
 st.markdown("""
-Please select a maximum of 4 electives. Please do not choose 2 courses scheduled for the same day.
-
-[No resubmission is allowed. Please check your selection carefully before clicking to submit]
-
-**[Important: You are required to enrol in the remaining 3 electives during the official enrolment period]**
+Please note the following:
+(1) Please select a maximum of 4 electives. Do not choose 2 courses scheduled for the same day.
+(2) No resubmission is allowed. Please check your selection carefully before clicking to submit.
+(3) **You are required to enrol in the remaining 3 electives during the official enrolment period.**
 """)
 st.divider()
 
@@ -97,6 +96,7 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.student_id = ""
     st.session_state.has_submitted = False
+    st.session_state.submitted_courses = []
 
 # --- LOGIN SCREEN ---
 if not st.session_state.logged_in:
@@ -126,20 +126,43 @@ if not st.session_state.logged_in:
 
 # --- ENROLMENT SCREEN ---
 else:
-    st.success(f"Welcome, Student {st.session_state.student_id}!")
-
-    # If they just submitted, hide the form and show success message
+    # If they just submitted, hide the form and show the SUMMARY PAGE
     if st.session_state.has_submitted:
-        st.info("✅ Your enrolment has been successfully recorded. You may now close this window.")
+        st.success("✅ Your enrolment has been successfully recorded!")
+        st.subheader("📝 Your Enrolment Summary")
+        
+        # Build the receipt text for downloading
+        receipt_text = f"Enrolment Receipt\nStudent Number: {st.session_state.student_id}\n"
+        receipt_text += "-" * 50 + "\n"
+        
+        # Display courses on screen AND add them to the receipt
+        for course in st.session_state.submitted_courses:
+            st.write(f"- {course}")
+            receipt_text += f"- {course}\n"
+            
+        receipt_text += "-" * 50 + "\n"
+        receipt_text += f"Date & Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        receipt_text += "Please keep this summary for your records."
+        
+        st.divider()
+        st.write("You can download a copy of your selections below, or you may now close this window.")
+        
+        # The Download Button
+        st.download_button(
+            label="💾 Download Summary",
+            data=receipt_text,
+            file_name=f"Enrolment_Summary_{st.session_state.student_id}.txt",
+            mime="text/plain"
+        )
 
     # Otherwise, show the checkboxes
     else:
+        st.success(f"Welcome, Student {st.session_state.student_id}!")
         selected_courses_with_day = []
 
         for day, courses in SCHEDULE.items():
             st.subheader(f"📅 {day}")
             for course in courses:
-                # FIX: We put the 'day' and 'course' together in the key so it is always 100% unique!
                 if st.checkbox(course, key=f"{day}_{course}"):
                     selected_courses_with_day.append((day, course))
 
@@ -168,6 +191,9 @@ else:
                 with st.spinner("Saving your enrolment..."):
                     final_courses = [item[1] for item in selected_courses_with_day]
 
+                    # Save the selected courses in memory so the summary page can display them!
+                    st.session_state.submitted_courses = final_courses.copy()
+
                     while len(final_courses) < 4:
                         final_courses.append("")
 
@@ -185,7 +211,7 @@ else:
                     response = requests.post(SHEETDB_URL, json=data)
 
                     if response.status_code == 201:
-                        # Success! Mark as submitted and refresh the page to hide the form
+                        # Success! Mark as submitted and refresh the page to show the summary
                         st.session_state.has_submitted = True
                         st.rerun()
                     else:
