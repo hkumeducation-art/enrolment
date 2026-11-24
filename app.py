@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 from datetime import datetime
+from fpdf import FPDF
+import tempfile
 
 st.set_page_config(page_title="Course Enrolment Portal")
 
@@ -8,16 +10,15 @@ st.set_page_config(page_title="Course Enrolment Portal")
 st.title("Pre-enrolment for GS students before official enrolment period")
 st.markdown("""
 Please note the following:
-(1) Please select a maximum of 4 electives. Do not choose 2 courses scheduled for the same day.
-(2) No resubmission is allowed. Please check your selection carefully before clicking to submit.
-(3) **You are required to enrol in the remaining 3 electives during the official enrolment period.**
+1. Please select a maximum of 4 electives. Do not choose 2 courses scheduled for the same day.
+2. No resubmission is allowed. Please check your selection carefully before clicking to submit.
+3. **You are required to enrol in the remaining 3 electives during the official enrolment period.**
 """)
 st.divider()
 
 # --- CONFIGURATION ---
 SHEETDB_URL = "https://sheetdb.io/api/v1/86bwjqyllhqzy"
 
-# The exact 30 student numbers allowed
 VALID_STUDENTS = [
     "30360001", "30360002", "30360003", "30360004", "30360005",
     "30360006", "30360007", "30360008", "30360009", "30360010",
@@ -27,7 +28,6 @@ VALID_STUDENTS = [
     "30360026", "30360027", "30360028", "30360029", "30360030"
 ]
 
-# Updated Course Dictionary Grouped by Semester and Day
 SCHEDULE = {
     "Semester 1 Mondays": [
         "MEDD6609 - Digital Technology and Educational leadership",
@@ -91,12 +91,42 @@ SCHEDULE = {
     ]
 }
 
-# --- SESSION STATE ---
+# --- PDF GENERATOR FUNCTION ---
+def create_pdf(student_id, courses_with_day):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Enrolment Receipt", ln=True, align="C")
+    pdf.ln(5)
+    
+    pdf.set_font("Arial", "", 12)
+    pdf.cell(0, 10, f"Student Number: {student_id}", ln=True)
+    pdf.cell(0, 10, "-"*65, ln=True)
+    
+    for day, course in courses_with_day:
+        pdf.set_font("Arial", "B", 11)
+        pdf.cell(0, 8, f"{day}:", ln=True)
+        pdf.set_font("Arial", "", 11)
+        pdf.multi_cell(0, 6, f"  - {course}")
+        pdf.ln(2)
+        
+    pdf.set_font("Arial", "", 12)
+    pdf.cell(0, 10, "-"*65, ln=True)
+    pdf.cell(0, 10, f"Date & Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", ln=True)
+    pdf.cell(0, 10, "Please keep this summary for your records.", ln=True)
+    
+    # Save to a temporary file and read as bytes for download
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        pdf.output(tmp.name)
+        with open(tmp.name, "rb") as f:
+            return f.read()
+
+# --- SESSION STATE INITIALIZATION ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.student_id = ""
-    st.session_state.has_submitted = False
-    st.session_state.submitted_courses = []
+    st.session_state.step = "select" # States: 'select', 'review', 'submitted'
+    st.session_state.selected_courses_with_day = []
 
 # --- LOGIN SCREEN ---
 if not st.session_state.logged_in:
@@ -107,10 +137,7 @@ if not st.session_state.logged_in:
         if student_id in VALID_STUDENTS:
             with st.spinner("Checking database..."):
                 try:
-                    # Look at Google Sheet to see who has submitted
                     all_records = requests.get(SHEETDB_URL).json()
-
-                    # Extract all student numbers that are already in the sheet
                     existing_students = [record.get("Student Number", "") for record in all_records if isinstance(record, dict)]
 
                     if student_id in existing_students:
@@ -119,81 +146,74 @@ if not st.session_state.logged_in:
                         st.session_state.logged_in = True
                         st.session_state.student_id = student_id
                         st.rerun()
-                except Exception as e:
+                except Exception:
                     st.error("Failed to connect to the database. Please try again.")
         else:
             st.error("Access Denied. Invalid Student Number.")
 
 # --- ENROLMENT SCREEN ---
 else:
-    # If they just submitted, hide the form and show the SUMMARY PAGE
-    if st.session_state.has_submitted:
-        st.success("✅ Your enrolment has been successfully recorded!")
-        st.subheader("📝 Your Enrolment Summary")
-        
-        # Build the receipt text for downloading
-        receipt_text = f"Enrolment Receipt\nStudent Number: {st.session_state.student_id}\n"
-        receipt_text += "-" * 50 + "\n"
-        
-        # Display courses on screen AND add them to the receipt
-        for course in st.session_state.submitted_courses:
-            st.write(f"- {course}")
-            receipt_text += f"- {course}\n"
-            
-        receipt_text += "-" * 50 + "\n"
-        receipt_text += f"Date & Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-        receipt_text += "Please keep this summary for your records."
-        
-        st.divider()
-        st.write("You can download a copy of your selections below, or you may now close this window.")
-        
-        # The Download Button
-        st.download_button(
-            label="💾 Download Summary",
-            data=receipt_text,
-            file_name=f"Enrolment_Summary_{st.session_state.student_id}.txt",
-            mime="text/plain"
-        )
-
-    # Otherwise, show the checkboxes
-    else:
+    # -----------------------------------
+    # STEP 1: SELECT COURSES
+    # -----------------------------------
+    if st.session_state.step == "select":
         st.success(f"Welcome, Student {st.session_state.student_id}!")
-        selected_courses_with_day = []
+        current_selections = []
 
         for day, courses in SCHEDULE.items():
             st.subheader(f"📅 {day}")
             for course in courses:
-                if st.checkbox(course, key=f"{day}_{course}"):
-                    selected_courses_with_day.append((day, course))
+                # Check if this course was previously selected so we can keep it ticked if they hit "Back"
+                is_checked = any(c == course and d == day for d, c in st.session_state.selected_courses_with_day)
+                
+                if st.checkbox(course, value=is_checked, key=f"{day}_{course}"):
+                    current_selections.append((day, course))
 
         st.divider()
 
-        if st.button("Submit Enrolment"):
-            total_selected = len(selected_courses_with_day)
-
+        if st.button("Review Selections"):
+            total_selected = len(current_selections)
             day_counts = {}
-            for day, course in selected_courses_with_day:
+            for day, course in current_selections:
                 day_counts[day] = day_counts.get(day, 0) + 1
-
+                
             conflict_days = [day for day, count in day_counts.items() if count > 1]
 
+            # Validations
             if total_selected == 0:
-                st.warning("Please select at least 1 course before submitting.")
-
+                st.warning("Please select at least 1 course before continuing.")
             elif total_selected > 4:
                 st.error(f"⚠️ You selected {total_selected} courses. You can only choose a maximum of 4.")
-
             elif conflict_days:
                 days_str = ", ".join(conflict_days)
                 st.error(f"⚠️ Schedule Conflict! You selected multiple courses on: **{days_str}**. Please choose only 1 course per time slot.")
-
             else:
+                # If valid, move to review step
+                st.session_state.selected_courses_with_day = current_selections
+                st.session_state.step = "review"
+                st.rerun()
+
+    # -----------------------------------
+    # STEP 2: REVIEW SUMMARY
+    # -----------------------------------
+    elif st.session_state.step == "review":
+        st.subheader("📝 Review Your Selections")
+        st.write("Please review your courses carefully. **Your enrolment is not submitted yet!**")
+        
+        st.info(" \n".join([f"- **{day}**: {course}" for day, course in st.session_state.selected_courses_with_day]))
+        
+        st.divider()
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("⬅️ Back to Edit"):
+                st.session_state.step = "select"
+                st.rerun()
+                
+        with col2:
+            if st.button("✅ Confirm & Submit"):
                 with st.spinner("Saving your enrolment..."):
-                    final_courses = [item[1] for item in selected_courses_with_day]
-
-                    # Save the selected courses in memory so the summary page can display them!
-                    st.session_state.submitted_courses = final_courses.copy()
-
+                    final_courses = [item[1] for item in st.session_state.selected_courses_with_day]
                     while len(final_courses) < 4:
                         final_courses.append("")
 
@@ -211,8 +231,24 @@ else:
                     response = requests.post(SHEETDB_URL, json=data)
 
                     if response.status_code == 201:
-                        # Success! Mark as submitted and refresh the page to show the summary
-                        st.session_state.has_submitted = True
+                        st.session_state.step = "submitted"
                         st.rerun()
                     else:
-                        st.error(f"Error {response.status_code}: {response.text}")
+                        st.error("Something went wrong. Please try again.")
+
+    # -----------------------------------
+    # STEP 3: SUBMITTED (SUCCESS & PDF)
+    # -----------------------------------
+    elif st.session_state.step == "submitted":
+        st.success("✅ **Success! Your enrolment has been officially recorded.**")
+        st.write("You may download your official PDF receipt below, or close this window.")
+        
+        # Generate the PDF file
+        pdf_bytes = create_pdf(st.session_state.student_id, st.session_state.selected_courses_with_day)
+        
+        st.download_button(
+            label="💾 Download PDF Receipt",
+            data=pdf_bytes,
+            file_name=f"Enrolment_Receipt_{st.session_state.student_id}.pdf",
+            mime="application/pdf"
+        )
