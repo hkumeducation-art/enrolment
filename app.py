@@ -139,7 +139,8 @@ else:
         for day, courses in SCHEDULE.items():
             st.subheader(f"📅 {day}")
             for course in courses:
-                if st.checkbox(course, key=course):
+                # FIX: We put the 'day' and 'course' together in the key so it is always 100% unique!
+                if st.checkbox(course, key=f"{day}_{course}"):
                     selected_courses_with_day.append((day, course))
 
         st.divider()
