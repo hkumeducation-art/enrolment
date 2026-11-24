@@ -7,7 +7,7 @@ import tempfile
 st.set_page_config(page_title="Course Enrolment Portal")
 
 # --- UPDATED HEADING AND TEXT ---
-st.title("Pre-enrolment for GS students before official enrolment period")
+st.title("Selection of electives for pre-enrolment before official enrolment period")
 st.markdown("""
 1. Please select a maximum of **4 electives**. Do not choose 2 courses scheduled for the same day.
 2. **No resubmission is allowed**. Please check your selections carefully before clicking to submit.
