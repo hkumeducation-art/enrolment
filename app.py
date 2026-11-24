@@ -20,11 +20,11 @@ SHEETDB_URL = "https://sheetdb.io/api/v1/86bwjqyllhqzy"
 
 # The exact 30 student numbers allowed
 VALID_STUDENTS = [
-    "30360001", "30360002", "30360003", "30360004", "30360005", 
-    "30360006", "30360007", "30360008", "30360009", "30360010", 
-    "30360011", "30360012", "30360013", "30360014", "30360015", 
-    "30360016", "30360017", "30360018", "30360019", "30360020", 
-    "30360021", "30360022", "30360023", "30360024", "30360025", 
+    "30360001", "30360002", "30360003", "30360004", "30360005",
+    "30360006", "30360007", "30360008", "30360009", "30360010",
+    "30360011", "30360012", "30360013", "30360014", "30360015",
+    "30360016", "30360017", "30360018", "30360019", "30360020",
+    "30360021", "30360022", "30360023", "30360024", "30360025",
     "30360026", "30360027", "30360028", "30360029", "30360030"
 ]
 
@@ -102,17 +102,17 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
     st.subheader("Student Login")
     student_id = st.text_input("Enter your Student Number:").strip()
-    
+
     if st.button("Access Portal"):
         if student_id in VALID_STUDENTS:
             with st.spinner("Checking database..."):
                 try:
                     # Look at Google Sheet to see who has submitted
                     all_records = requests.get(SHEETDB_URL).json()
-                    
+
                     # Extract all student numbers that are already in the sheet
                     existing_students = [record.get("Student Number", "") for record in all_records if isinstance(record, dict)]
-                    
+
                     if student_id in existing_students:
                         st.error("❌ You have already submitted your enrolment. Multiple submissions are not allowed.")
                     else:
@@ -127,49 +127,49 @@ if not st.session_state.logged_in:
 # --- ENROLMENT SCREEN ---
 else:
     st.success(f"Welcome, Student {st.session_state.student_id}!")
-    
+
     # If they just submitted, hide the form and show success message
     if st.session_state.has_submitted:
         st.info("✅ Your enrolment has been successfully recorded. You may now close this window.")
-        
+
     # Otherwise, show the checkboxes
     else:
         selected_courses_with_day = []
-        
+
         for day, courses in SCHEDULE.items():
             st.subheader(f"📅 {day}")
             for course in courses:
                 if st.checkbox(course, key=course):
                     selected_courses_with_day.append((day, course))
-                    
+
         st.divider()
-        
+
         if st.button("Submit Enrolment"):
             total_selected = len(selected_courses_with_day)
-            
+
             day_counts = {}
             for day, course in selected_courses_with_day:
                 day_counts[day] = day_counts.get(day, 0) + 1
-                
+
             conflict_days = [day for day, count in day_counts.items() if count > 1]
-            
+
             if total_selected == 0:
                 st.warning("Please select at least 1 course before submitting.")
-                
+
             elif total_selected > 4:
                 st.error(f"⚠️ You selected {total_selected} courses. You can only choose a maximum of 4.")
-                
+
             elif conflict_days:
                 days_str = ", ".join(conflict_days)
                 st.error(f"⚠️ Schedule Conflict! You selected multiple courses on: **{days_str}**. Please choose only 1 course per time slot.")
-                
+
             else:
                 with st.spinner("Saving your enrolment..."):
                     final_courses = [item[1] for item in selected_courses_with_day]
-                    
+
                     while len(final_courses) < 4:
                         final_courses.append("")
-                    
+
                     data = {
                         "data": [{
                             "Student Number": st.session_state.student_id,
@@ -180,9 +180,9 @@ else:
                             "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         }]
                     }
-                    
+
                     response = requests.post(SHEETDB_URL, json=data)
-                    
+
                     if response.status_code == 201:
                         # Success! Mark as submitted and refresh the page to hide the form
                         st.session_state.has_submitted = True
