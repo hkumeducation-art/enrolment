@@ -20,75 +20,75 @@ SHEETDB_URL = "https://sheetdb.io/api/v1/86bwjqyllhqzy"
 
 # The exact 30 student numbers allowed
 VALID_STUDENTS = [
-    "30360000", "30361235", "30361264", "30361321", "30362111", 
-    "30362154", "30362222", "30362323", "30363003", "30363333", 
-    "30364251", "30364263", "30364444", "30364566", "30365262", 
-    "30365478", "30365545", "30365555", "30365650", "30366425", 
-    "30366666", "30367847", "30367878", "30367898", "30367899", 
-    "30368798", "30369241", "30369812", "30369854", "30369999"
+    "30360001", "30360002", "30360003", "30360004", "30360005", 
+    "30360006", "30360007", "30360008", "30360009", "30360010", 
+    "30360011", "30360012", "30360013", "30360014", "30360015", 
+    "30360016", "30360017", "30360018", "30360019", "30360020", 
+    "30360021", "30360022", "30360023", "30360024", "30360025", 
+    "30360026", "30360027", "30360028", "30360029", "30360030"
 ]
 
 # Updated Course Dictionary Grouped by Semester and Day
 SCHEDULE = {
     "Semester 1 Mondays": [
-        "MABC0001 - Intro to course 001",
-        "MABC0002 - Intro to course 002",
-        "MABC0003 - Intro to course 003 (ARM)",
-        "MABC0004 - Intro to course 004"
+        "MEDD6609 - Digital Technology and Educational leadership",
+        "MEDD7117 - Drama Appreciation and Teaching",
+        "MEDD8666 - Abnormal Psychology and Positive Psychology",
+        "MEDD8678 - Counselling Process, Ethics and Skills"
     ],
     "Semester 1 Tuesdays": [
-        "MABC0005 - Intro to course 005",
-        "MABC0006 - Intro to course 006",
-        "MABC0007 - Intro to course 007",
-        "MABC0008 - Intro to course 008"
+        "MEDD8679 - Counselling Assessment and Interventions",
+        "MEDD8801 - Classical Chinese Language and the Reading of Classical Texts",
+        "MEDD8802 - Sociology of Education: Classic and Contemporary Theories ",
+        "MEDD8815(A) (ARM) - Introduction to Statistical Methods"
     ],
     "Semester 1 Wednesdays": [
-        "MABC0009 - Intro to course 009",
-        "MABC0010 - Intro to course 010 (ARM)",
-        "MABC0011 - Intro to course 011",
-        "MABC0012 - Intro to course 012"
+        "MEDD8815(B) (ARM) - Introduction to Statistical Methods",
+        "MEDD8829 - Effective Strategies for Learning and Teaching in Small Class Environment for Primary Education",
+        "MEDD8831 - Nurturing Creativity: Theories and Practices",
+        "MEDD8836 - Personal Growth of Teachers and Guidance Personnel"
     ],
     "Semester 1 Thursdays": [
-        "MABC0013 - Intro to course 013",
-        "MABC0014 - Intro to course 014"
+        "MEDD8877 - Social and Emotional Needs of Gifted Individuals",
+        "MEDD8881 - Learning Design and Technology"
     ],
     "Semester 1 Fridays": [
-        "MABC0015 - Intro to course 015",
-        "MABC0016 - Intro to course 016",
-        "MABC0017 - Intro to course 017",
-        "MABC0018 - Intro to course 018"
+        "MEDD8884 - Career Counselling and Talent Development in Schools",
+        "MEDD8886 (ARM) - Qualitative Methods: Research Design, Data Collection and Analysis",
+        "MEDD8888 (ARM) - Methods for Evaluation Research in Education",
+        "MEDD8889 - Strategic Leadership in School Administration and Management for Career Advancement "
     ],
     "Semester 2 Mondays": [
-        "MABC0019 - Intro to course 019",
-        "MABC0020 - Intro to course 020 (ARM)",
-        "MABC0021 - Intro to course 021",
-        "MABC0022 - Intro to course 022",
-        "MABC0023 - Intro to course 023"
+        "MEDD8888 (ARM) - Methods for Evaluation Research in Education",
+        "MEDD8890 - Edu-Preneurial Leadership in Continuing Professional Development for Career Advancement",
+        "MEDD8907 (ARM) - Statistical Analyses for Advancing Educational Equity and Social Justice ",
+        "MEDD8908 (ARM) - Foundations of Qualitative Education Research: Concepts, Strategies and Methods",
+        "MEDD8913 - Educational Leadership for Equity and Social Justice"
     ],
     "Semester 2 Tuesdays": [
-        "MABC0024 - Intro to course 024",
-        "MABC0025 - Intro to course 025",
-        "MABC0026 - Intro to course 026",
-        "MABC0027 - Intro to course 027"
+        "MEDD8916 - Public Policy in Early Childhood and Primary Education",
+        "MEDD8920 - Classroom Research in General Studies and Liberal Education",
+        "MEDD8943 - Empowering Language Teaching with Technology, Learning, Assessment and Feedback Design",
+        "MEDD8886 (ARM) - Qualitative Methods: Research Design, Data Collection and Analysis"
     ],
     "Semester 2 Wednesdays": [
-        "MABC0028 - Intro to course 028",
-        "MABC0029 - Intro to course 029",
-        "MABC0030 - Intro to course 030 (ARM)",
-        "MABC0031 - Intro to course 031",
-        "MABC0032 - Intro to course 032"
+        "MEDD8925 (ARM) - Analysing Textual and Documentary Data in Quantitative Research",
+        "MEDD8926 (ARM) - Methods and Measurement in Comparative Research: Happiness, Well-Being, and Education",
+        "MEDD8928 - Educational Change in a Global Era: Theories and Debates",
+        "MEDD8931 - People-centric Design for Education Using Simulation Technology",
+        "MEDD8933 (ARM) - Identifying Evidence-based Practices in School Settings: Experimental Research Method and Design"
     ],
     "Semester 2 Thursdays": [
-        "MABC0033 - Intro to course 033",
-        "MABC0034 - Intro to course 034",
-        "MABC0035 - Intro to course 035",
-        "MABC0036 - Intro to course 036",
-        "MABC0037 - Intro to course 037 (ARM)"
+        "MEDD8934 - Artificial Intelligence and Language Education",
+        "MEDD8935 - Theories of Learning in STEM Education",
+        "MEDD8939 (ARM) - Conducting, Analysing, and Reporting Interviews",
+        "MEDD8940 (ARM) - Design-based Research for Educational Problem-solving",
+        "MEDD8942 (ARM) - Interviews in Educational Research"
     ],
     "Semester 2 Fridays": [
-        "MABC0038 - Intro to course 038 (ARM)",
-        "MABC0039 - Intro to course 039",
-        "MABC0040 - Intro to course 040"
+        "MEDD8944 - Leading Curriculum in Context: An Introduction to Global Perspectives",
+        "MEDD8945 - Leading Sustainable School-Community Relations",
+        "MEDD8908 - Foundations of Qualitative Education Research: Concepts, Strategies and Methods"
     ]
 }
 
